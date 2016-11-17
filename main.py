@@ -31,14 +31,16 @@ def run_enigma(d):
     counter = 0
     for plug_perm in permutations(plugboard, 20):
         counter += 1
-        if counter % 100000 == 0:
-            print(counter)
+        if counter % 1000000 == 0:
+            print(str(counter/5.6012703e21)+"%")
 
         machine = EnigmaMachine.from_key_sheet(
             rotors=d["rotor"],
             reflector=d["ref"],
             ring_settings=d["ring"],
             plugboard_settings=get_plug_string(plug_perm))
+
+        machine.set_display(d["start"])
 
         output = machine.process_text(CIPHERTEXT)
         if output == "BLETCHLEYPARK":
@@ -58,9 +60,12 @@ def gen_setting():
         for r2 in ring_setting:
             for r3 in ring_setting:
                 for refl in reflectors:
-                    for rot_perm in permutations(rotors, 3):
-                        yield {"rotor": rot_perm, "ref": refl, "ring": [r1, r2, r3]}
-                        print("Checking rotor:", rot_perm)
+                    for s1 in plugboard:
+                        for s2 in plugboard:
+                            for s3 in plugboard:
+                                for rot_perm in permutations(rotors, 3):
+                                    yield {"rotor": rot_perm, "ref": refl, "ring": [r1, r2, r3], "start": s1 + s2 + s3}
+                                    print("Checking rotor:", rot_perm)
 
 
 def main():
