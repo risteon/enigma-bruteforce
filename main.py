@@ -4,12 +4,13 @@ from itertools import permutations
 from joblib import Parallel, delayed
 from multiprocessing import cpu_count
 
+
 from enigma.machine import EnigmaMachine
 
 
-__author__ = "Author"
-__copyright__ = "Copyright 2016, Author"
-__license__ = "TODO"
+__author__ = "Christoph Rist"
+__copyright__ = "Copyright 2016, Christoph Rist"
+__license__ = "MIT"
 
 CIPHERTEXT = 'HOOJILEQKCYJN'
 plugboard = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
@@ -41,15 +42,16 @@ def run_enigma(d):
 
         output = machine.process_text(CIPHERTEXT)
         if output == "BLETCHLEYPARK":
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2")
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             print(d)
             print("PLUGS: ", plug_perm)
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2")
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            raise RuntimeError("Solution found.")
 
 
 def gen_setting():
     rotors = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
-    reflectors = ['B', 'C']
+    reflectors = ['B'] #, 'C'] this is known to be reflector B!
     ring_setting = list(range(26))
 
     for r1 in ring_setting:
