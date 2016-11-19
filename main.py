@@ -18,6 +18,8 @@ ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
             'U', 'V', 'W', 'X', 'Y', 'Z']
 NUMBER_RANGE = list(range(26))
 
+COUNTER = 0
+
 
 def generate_plug_settings():
 
@@ -44,30 +46,33 @@ def generate_rotor_positions():
 
 def generate_ring_settings():
     for r1 in NUMBER_RANGE:
-        for r2 in NUMBER_RANGE:
-            for r3 in NUMBER_RANGE:
-                yield [r1, r2, r3]
+        for r2 in NUMBER_RANGE[:14]:
+            #for r3 in NUMBER_RANGE:
+            yield [r1, r2, 23]#, r3]
 
 
 def run_enigma(d):
+    f = open('out.txt', 'a')
     machine = EnigmaMachine.from_key_sheet(
         rotors=d["rotor"],
         reflector=d["ref"],
-        ring_settings=d["ring"],
-        plugboard_settings=d["plug"])
+        ring_settings=d["ring"])
+        #plugboard_settings=d["plug"])
 
-    print("Created enigma from settings: ")
-    print(d)
 
     for r in generate_rotor_positions():
+        global COUNTER
         machine.set_display(r)
         output = machine.process_text(CIPHERTEXT)
-        if output == "BLETCHLEYPARK":
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-            print(d)
-            print("ROTOR POSITION: ", r)
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-            raise RuntimeError("Solution found.")
+        f.write(str(d)+" "+str(r)+" ---> "+str(output)+"\n")
+        COUNTER += 1
+        print(COUNTER*100/358269184.0)
+        #if output == "BLETCHLEYPARK":
+        #    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        #    print(d)
+        #    print("ROTOR POSITION: ", r)
+        #    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        #    raise RuntimeError("Solution found.")
 
 
 def gen_setting():
@@ -77,14 +82,13 @@ def gen_setting():
     for r in generate_ring_settings():
         for refl in reflectors:
             for rot_perm in permutations(rotors, 3):
-                for plug_perm in generate_plug_settings():
-                    yield {"rotor": rot_perm, "ref": refl, "ring": r, "plug": plug_perm}
+                #for plug_perm in generate_plug_settings():
+                yield {"rotor": rot_perm, "ref": refl, "ring": r}#, "plug": plug_perm}
 
 
 def main():
 
     assert(len(ALPHABET) == 26)
-
     num_cores = cpu_count()
     Parallel(n_jobs=num_cores)(delayed(run_enigma)(i) for i in gen_setting())
 
