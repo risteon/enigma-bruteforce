@@ -26,10 +26,15 @@ data_queue = Queue(max_queue_size)
 solution_queue = Queue(cpu_count())
 
 
-def gen_setting():
+def gen_setting(ciphertext, plaintext):
+    unused_alpha = set(ALPHABET) - set(ciphertext) - set(plaintext)
+
     def generate_plug_settings():
 
         def generate_pairs_from_set(l, p_comb):
+            if not bool(set(l) - unused_alpha):
+                yield p_comb
+                return
             for i in range(1, len(l)):
                 rn = p_comb + l[0] + l[i] + " "
                 ln = [l[j] for j in range(1, len(l)) if j is not i]
@@ -37,10 +42,19 @@ def gen_setting():
                     yield from generate_pairs_from_set(ln, rn)
                 else:
                     yield rn
-
-        for comb in combinations(ALPHABET, 20):
+        # <-- 230230 iterations -->
+        for comb in combinations(reversed(ALPHABET), 20):
             plug = ""
-            yield from generate_pairs_from_set(comb, plug)
+            ll = list(comb)
+            c = len(ll) - 1
+            for u in unused_alpha:
+                for i in range(0, c+1):
+                    if ll[i] == u:
+                        ll[i], ll[c] = ll[c], ll[i]
+                        c -= 1
+                        break
+
+            yield from generate_pairs_from_set(ll, plug)
 
     def generate_ring_settings():
         for r1 in NUMBER_RANGE:
@@ -51,15 +65,18 @@ def gen_setting():
     rotors = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
     reflectors = ['B', 'C']
 
-    for r in generate_ring_settings():
-        for refl in reflectors:
+    # <-- 2 iterations -->
+    for refl in reflectors:
+        # <-- 17576 iterations -->
+        for r in generate_ring_settings():
+            # <-- 336 iterations -->
             for rot_perm in permutations(rotors, 3):
                 for plug_perm in generate_plug_settings():
                     yield {"rotor": rot_perm, "ref": refl, "ring": r, "plug": plug_perm}
 
 
-def combinations_task():
-    for setting in gen_setting():
+def combinations_task(ciphertext, plaintext):
+    for setting in gen_setting(ciphertext, plaintext):
         while data_queue.qsize() >= max_queue_size:
             time.sleep(0.2)
             if stop_event.is_set():
@@ -93,7 +110,7 @@ def run_enigma_task(num):
 
         print("Created enigma from settings: ")
         print(d)
-
+        # <-- 17576 iterations -->
         for r in generate_rotor_positions():
             machine.set_display(r)
 
@@ -137,7 +154,7 @@ def main():
     pool = Pool(num_cores)
     r = pool.map_async(run_enigma_task, [i for i in range(num_cores)])
     # generate combinations
-    combinations_task()
+    combinations_task(CIPHERTEXT, PLAINTEXT)
 
     pool.close()
     pool.join()
