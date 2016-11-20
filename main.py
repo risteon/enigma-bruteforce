@@ -3,6 +3,7 @@
 from itertools import permutations, combinations
 from joblib import Parallel, delayed
 from multiprocessing import cpu_count
+from difflib import SequenceMatcher
 
 
 from enigma.machine import EnigmaMachine
@@ -19,6 +20,9 @@ ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
 NUMBER_RANGE = list(range(26))
 
 COUNTER = 0
+
+def similar(a, b):
+    return sum(1 for i, j in zip(a, b) if i == j)
 
 
 def generate_plug_settings():
@@ -45,10 +49,10 @@ def generate_rotor_positions():
 
 
 def generate_ring_settings():
-    for r1 in NUMBER_RANGE:
-        for r2 in NUMBER_RANGE[:14]:
+    for r1 in NUMBER_RANGE[:14]:
+        for r2 in NUMBER_RANGE[:1]:
             #for r3 in NUMBER_RANGE:
-            yield [r1, r2, 23]#, r3]
+            yield [r1, r2, 0]#, r3]
 
 
 def run_enigma(d):
@@ -64,9 +68,11 @@ def run_enigma(d):
         global COUNTER
         machine.set_display(r)
         output = machine.process_text(CIPHERTEXT)
-        f.write(str(d)+" "+str(r)+" ---> "+str(output)+"\n")
+        if similar(output, "BLETCHLEYPARK") == 3 and output[1:2] == output[6:7]:
+            f.write(str(d)+" "+str(r)+" ---> "+str(output)+"\n")
+            print(str(d)+" "+str(r)+" ---> "+str(output))
         COUNTER += 1
-        print(COUNTER*100/358269184.0)
+        print(COUNTER*100/18396504.0)
         #if output == "BLETCHLEYPARK":
         #    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         #    print(d)
