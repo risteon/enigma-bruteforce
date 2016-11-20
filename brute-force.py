@@ -6,7 +6,7 @@ import argparse
 
 from enigma.machine import EnigmaMachine
 
-from combinations import ALPHABET, NUMBER_RANGE, gen_setting
+from combinations import gen_setting, generate_rotor_positions
 
 __author__ = "Christoph Rist"
 __copyright__ = "Copyright 2016, Christoph Rist"
@@ -41,12 +41,6 @@ def run_enigma_task(num):
                 return
             time.sleep(0.05)
         d = data_queue.get()
-
-        def generate_rotor_positions():
-            for s1 in ALPHABET:
-                for s2 in ALPHABET:
-                    for s3 in ALPHABET:
-                        yield s1 + s2 + s3
 
         machine = EnigmaMachine.from_key_sheet(
             rotors=d["rotor"],

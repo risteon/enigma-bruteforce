@@ -23,7 +23,13 @@ def generate_plug_settings(nb_plugs, unused_alpha=set()):
                 yield rn
 
     # <-- 230230 iterations -->
-    for comb in combinations(reversed(ALPHABET), nb_plugs):
+    empty_set = False
+    for comb in combinations(ALPHABET, nb_plugs*2):
+        if not bool(set(comb) - unused_alpha):
+            if empty_set:
+                continue
+            empty_set = True
+
         plug = ""
         ll = list(comb)
         c = len(ll) - 1
@@ -37,14 +43,23 @@ def generate_plug_settings(nb_plugs, unused_alpha=set()):
         yield from generate_pairs_from_set(ll, plug)
 
 
+def generate_ring_settings(text_len=None):
+    #TODO: use text_len to dramatically decrease possibilities for short texts
+    for r1 in NUMBER_RANGE:
+        for r2 in NUMBER_RANGE:
+            for r3 in NUMBER_RANGE:
+                yield [r1, r2, r3]
+
+
+def generate_rotor_positions():
+    for s1 in ALPHABET:
+        for s2 in ALPHABET:
+            for s3 in ALPHABET:
+                yield s1 + s2 + s3
+
+
 def gen_setting(ciphertext, plaintext):
     unused_alpha = set(ALPHABET) - set(ciphertext) - set(plaintext)
-
-    def generate_ring_settings():
-        for r1 in NUMBER_RANGE:
-            for r2 in NUMBER_RANGE:
-                for r3 in NUMBER_RANGE:
-                    yield [r1, r2, r3]
 
     rotors = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
     reflectors = ['B', 'C']
